@@ -1,0 +1,230 @@
+\documentclass[12pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{url}
+\usepackage[top=3cm, bottom=3cm, left=3cm, right=3cm]{geometry}
+\usepackage{graphics, graphicx}
+\usepackage{setspace}
+\usepackage{pdflscape}
+\usepackage{multicol}
+\usepackage{algpseudocode, algorithm}
+\usepackage{natded}
+\usepackage{indentfirst}
+\pagestyle{myheadings}
+%\usepackage[]{algorithm2e}
+%\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{verbatim}
+
+
+	\thispagestyle{empty}
+    \begin{document}
+        
+	\begin{center}
+		\textbf{Instituto Federal de Educação, Ciência e Tecnologia do Ceará}
+		
+		\textbf{Bacharelado em Ciência da Computação 2017.2}
+		
+		\textbf{Disciplina:} Redes Neurais Artificiais
+		
+		\textbf{Professor:} Ajalmar Rocha
+		
+		\textbf{Aluno:} José Igor de Carvalho	
+			
+	\end{center}
+
+    \hline
+
+\begin{center}
+    \huge{Relatório 1:}
+    
+    \huge{Perceptron Simples}
+    
+\end{center}
+     \hline
+    \section{Introdução}
+    
+    \noindent
+    O documento em questão tem por objetivo registrar os resultados obtidos após a execução do algoritmo Perceptron Simples para duas base de dados distintas. Um dos conjuntos de dados usados foi gerado artificialmente enquanto o outro, conjunto de dados da Iris, é bastante conhecido e está disponível na internet. Mais especificamente, nos preocupamos com o registro da taxa de acerto, acurácia e desvio padrão para a classificação que o algoritmo nos fornece para as base de dados citadas acima.
+    
+    Inicialmente iremos apresentar as bases de dados utilizadas para os experimentos, isto é, ao que se referem os dados contidos no conjunto de dados da Iris e como foi gerada uma base de dados artificial. Feita esta pequena explanação sobre os dados utilizados, trataremos de alguns detalhes de implementação. Por fim, apresentaremos os resultados obtidos.
+    
+    \section{Bases de dados utilizadas}
+    \noindent
+    Nesta seção faremos breves esclarecimentos sobre as bases de dados que foram utilizadas para dos testes.
+    
+    \subsection{Base de dados da Iris}
+    \noindent
+    A base de dados da Iris é, provavelmente, o conjunto de dados mais conhecido quando falamos em reconhecimento de padrões. Este conjunto de dados se refere a classificação de 3 especies de flores para plantas do gênero Iris: Iris-setosa, Iris-versicolor e Iris-virginica. Abaixo temos uma amostra dos dados deste conjunto.
+    
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|c|}
+            \hline
+            $x_1$&$x_2$&$x_3$&$x_4$&Classe \\ \hline 
+            $5.1$&$3.5$&$1.4$&$0.2$&Iris-setosa \\
+            $5.9$&$3.0$&$4.2$&$1.5$&Iris-versicolor \\
+            $7.7$&$2.6$&$6.9$&$2.3$&Iris-virginica \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    Neste conjunto, $x_1$, $x_2$, $x_3$ e $x_4$ referem-se á largura da sépala, comprimento da sépala largura da pétala e comprimento da pétala das flores respectivamente. Já a classe refere-se à espécie da flor.
+    
+    O conjunto mostrado acima possui apenas 3 amostras, no entanto, a base de dados original possui 150 amostras com 50 amostras para cada espécie.
+
+    
+    \subsection{Base de dados artificial}
+    \noindent
+    Como dito anteriormente, também foram gerados alguns dados aleatórios para testes. É importante ressaltar que o Perceptron Simples é um classificador linear, isto é, ele é capaz de classificar dados em apenas duas classes. Assim, os dados gerados tiveram que formar um conjunto linearmente independente. Abaixo mostraremos o código utilizado para gerar este conjunto de dados.
+    
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.90\textwidth]{code1.jpg}
+        \caption{Gerando dados aleatórios linearmente separáveis}
+        %\label{fig:exampleFig1}
+    \end{figure}
+     
+    Inicialmente definimos uma variável especificando a quantidade de amostras para cada classe. Nesse caso, temos uma variável \texttt{N} com valor 500 especificando que queremos gerar 500 amostras de cada classe. Feito isso, criamos uma variável chamada \texttt{offset} definindo uma distância média para cada amostra á ser gerada. Feito isto, foram geradas aleatoriamente duas matrizes \texttt{X} e \texttt{Y} com dimensões $1000\times2$ e $1000\times1$ respectivamente. A primeira matriz refere-se aos atributos de cada amostra gerada. A segunda refere-se as classes dos atributos que foram gerados. Por fim, concatenamos as duas matrizes horizontalmente.
+    
+    
+    \section{Metodologia}
+    \noindent
+    Nesta seção trataremos de alguns detalhes de implementação do algoritmo. Os códigos em questão foram escritos em Matlab.
+    
+    \subsection{Regra de aprendizagem}
+    \noindent
+    Como já sabemos, matematicamente, a regra de aprendizagem é dada pela formula equação abaixo
+    
+    \begin{equation}
+        \textbf{w}(n+1) = \textbf{w}(n)+\eta e \textbf{x}(n) 
+    \end{equation}
+    
+    onde o vetor \textbf{w} é um vetor de pesos sinápticos, $\eta$ é uma taxa de aprendizagem, $e$ é o erro entre os dados na base de dados e o valor que temos após a aplicação da função de ativação e \textbf{x} é o vetor de atributos.
+    
+    Esta regra de aprendizagem é aplicada em uma fração do conjunto de dados chamada conjunto de treinamento. Além disso, esta operação é realizada uma determinada quantidade de vezes que são conhecidas como épocas.
+    
+    Para implementar o que foi dito acima, criamos uma função chamada \texttt{learning\_rule} a qual tem como parâmetros um conjunto de treinamento, uma quantidade de épocas e uma taxa de aprendizagem e nos retorna um vetor \textbf{w} da pesos sinápticos da forma
+    
+    \begin{equation}
+        \textbf{w} = [\theta, w_1, w_1, \dots, w_n]
+    \end{equation}
+    
+    onde $\theta$ é o chamado thrashold ou bias.
+     
+   \subsection{Função de ativação}
+    
+    A função de ativação é responsável por classificar uma determinada amostra. Para o Perceptron Simples, esta função dada da seguinte forma:
+    
+    
+    \begin{equation}
+    f(u) = \left\{
+    \begin{array}{ll}
+    1 , & \textrm{se}\ u\geq \theta\\
+    0 ,& \textrm{se}\ u < \theta
+    \end{array}\right
+    \end{equation}
+    
+    onde 
+    
+    \begin{equation}
+        u = \sum w_ix_i.
+    \end{equation}
+    \noindent
+    Implementamos uma função chamada \texttt{activation} que tem como parâmetro um valor $u$ e nos retorna um outro valor que pode ser igual a 1 para $u$ para valores positivos e 0 caso contrário.
+    
+    Uma realização consiste no treinamento de um neurônio para um um determinado conjunto de treinamento por determinadas épocas, junto com o cálculo da taxa de acerto para cada teste realizado após o treinamento.
+    
+    \subsection{Normalização de dados}
+    
+    Antes de submeter ambos os conjuntos de dados para treinamento e posteriormente à testes, foi necessário normalizar os dados. Esta normalização foi executada com base na equação abaixo
+    
+    \begin{equation}
+        x_{i, j}^{\textrm{new}} = \dfrac{x_{i, j}^{\textrm{old}} - \min (\textbf{x}_j)}{\max (\textbf{x}_j)-\min(\textbf{x}_j)}
+    \end{equation}
+     
+    Uma pequena função chamada \texttt{normalize} foi implementada. Esta função recebe como parâmetro uma base de dados e devolve outra base de dados normalizada segundo a equação acima.
+    
+    \subsection{Verificação dos dados}
+    \noindent
+    A verificação dos dados é, relativamente, bem simples. Esta verificação é realizada da seguinte forma: se $u-\textbf{y}(i) = 0$ então houve um acerto na verificação, caso contrário, temos uma falha e então o algoritmo errou a classificação. Note que $ u-\textbf{y}(i) = e$ onde $e$ é o mesmo da equação (1).
+    
+    Para realizar efetuar esta verificação, foi implementada uma pequena função chamada \texttt{verify} que recebe como parâmetro um conjunto de testes e nos retorna a quantidade de acertos e erros de classificação.
+    
+    Este função é extremamente importante para o cálculo da taxa de acerto para um teste. Este cálculo é feito da seguinte forma: para cada teste realizamos uma verificação no conjunto de testes e então teremos a quantidade de acertos e a quantidade de erros de classificação. Feito isto, podemos calcular a taxa de acertos pela equação
+    
+    \begin{equation}
+        \textbf{Taxa de acerto} = \dfrac{\textrm{qtd\_acertos}}{\textrm{qtd\_acertos}+\textrm{qtd\_erros}}.
+    \end{equation}
+    
+    \section{Resultados}
+    \noindent
+    Nesta seção iremos avaliar a eficácia do algoritmo implementado para as bases de dados citadas na seção 2.
+    
+    \subsection{Base de dados artificial} 
+    \noindent
+    Já explicamos como a base de dados artificial foi gerada. Aqui iremos mostrar os resultados para execução do algoritmo implementado nesta base de dados. Mas antes, devemos explicar o conceito de realização.
+       
+    Cada realização é composta por o treinamento de um neurônio por determinada quantidade de épocas, um teste e o registro da taxa de acerto. Dessa forma, se tivermos 10 realizações iremos armazenar 10 taxas de acerto. Calculando a média das taxas de acerto, obteremos a acurácia do método para determinada base de dados.
+    
+    Como já foi dito, a base de dados artificial possui 1000 amostras com 500 amostras de cada classe. Definimos as classes como 0 e 1. Selecionamos aleatoriamente 700 amostras para treinamento e 300 amostras para teste. Os dados gerados são mostrados na Figura 2
+    
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.70\textwidth]{plot_1.png}
+        \caption{Dados gerados aleatoriamente}
+        %\label{fig:exampleFig1}
+    \end{figure}
+    
+    Além disso, como temos apenas dois atributos para cada amostra, é possível desenharmos uma reta de decisão. Esta reta pode ser obtida pela equação (7). A figura 3 mostra essa reta de decisão para os dados gerados.
+    
+    \begin{equation}
+        x_2 = -\left( \dfrac{w_1}{w_2} \right)x_1 + \left( \dfrac{\theta}{w_2} \right)
+    \end{equation}
+    
+     \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.70\textwidth]{plot_2.png}
+        \caption{Dados gerados aleatoriamente juntamente com a reta de decisão}
+        %\label{fig:exampleFig1}
+    \end{figure}
+    
+    Com os dados gerados, podemos gerar um mapa de cores simples, que é mostrado na Figura 4.
+    
+    \begin{figure}[!htb]
+        \centering
+        \includegraphics[width=.70\textwidth]{plot_4.png}
+        \caption{Mapa de cores}
+        %\label{fig:exampleFig1}
+    \end{figure}
+    
+    Para esta base de dados, a acurácia foi 0.9870 e o desvio padrão foi 0.0200. Também foi calculada uma matriz de confusão para a ultima realização. Esta matriz é mostrada mais abaixo.
+    
+   \begin{center}
+    \begin{tabular}{c|cc}
+         & 0 & 1 \\ \hline 
+         0 & 154 & 2 \\
+         1 & 0 & 144 \\ 
+    \end{tabular}
+\end{center}
+
+\section{Base de dados da Iris}
+Como dito anteriormente, a base de dados da Iris possui 150 amostras e 3 classes. Desta forma, o Perceptron Simples não é capaz de classificar corretamente. Assim, foi necessário uma pequena alteração para tornar os dados linearmente independentes. Basicamente, substituímos a classe Iris-setosa por 1 e as classes Iris-versicolor e Iris-virginica foram substituídas por 0. Dessa forma, o conjunto de dados se torna linearmente independente.
+
+Além disso, pelo fato de possuirmos 4 atributos para cada amostra, não é possível gerar gráficos mostrando os dados presentes no conjunto. Assim, podemos apenas mostrar a eficácia do algoritmo por meio do acurácia, desvio padrão e matriz de confusão. Assim, acurácia registrada foi 0.9850 já o desvio padrão foi 0.0253. Já a matriz de confusão é mostrada mais abaixo.
+
+\begin{center}
+    \begin{tabular}{c|cc}
+        & 0 & 1 \\ \hline 
+        0 & 15 & 1 \\
+        1 & 0 & 14 \\ 
+    \end{tabular}
+\end{center}
+
+\section{Considerações finais}
+
+Como podemos verificar, o Perceptron Simples é um algoritmo extremamente eficaz quando necessitamos classificar conjuntos de dados linearmente separáveis. Isto é provado pelos resultados obtidos na seção anterior. É claro que, na maioria das vezes, os problemas do mundo real são bem mais complexos do que os apresentados neste documento mas a implementação deste algoritmo foi, sem dúvida, um ponta pé inicial no estudo das Redes Neurais Artificiais.
+    
+\end{document}
